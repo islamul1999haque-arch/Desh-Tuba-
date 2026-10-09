@@ -1,0 +1,195 @@
+```html
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desh Tuba - বাংলাদেশের জেলা তথ্য</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6fa;color:#182338}
+header{background:#075b45;color:white;text-align:center;padding:24px 12px}
+header h1{margin:0 0 8px}
+main{max-width:900px;margin:auto;padding:16px}
+input,select{width:100%;padding:13px;margin:8px 0;border:1px solid #ccc;border-radius:10px;font-size:16px}
+button{padding:12px;border:0;border-radius:9px;background:#075b45;color:white;font-size:15px;cursor:pointer}
+#divisions{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
+#divisions button{background:#dcebe5;color:#075b45}
+#divisions button.active{background:#075b45;color:white}
+#districts{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+#districts button{background:white;color:#182338;border:1px solid #ddd;text-align:left}
+#details{display:none;background:white;padding:16px;margin-top:20px;border-radius:12px}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.card{background:#f7f9fb;padding:12px;border-radius:10px;overflow-wrap:anywhere}
+.card h3{font-size:16px;color:#075b45}
+footer{text-align:center;padding:20px;color:#667}
+@media(min-width:600px){#districts{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:380px){.cards{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🇧🇩 Desh Tuba</h1>
+<p>বাংলাদেশের ৬৪ জেলার তথ্যভান্ডার</p>
+<p>শিক্ষা, চিকিৎসা, হোটেল ও স্থানীয় সেবা খুঁজুন</p>
+</header>
+
+<main>
+<h3>🔎 জেলা খুঁজুন</h3>
+<input id="search" placeholder="জেলার নাম লিখুন..." oninput="renderDistricts()">
+
+<h3>বিভাগ নির্বাচন করুন</h3>
+<div id="divisions"></div>
+
+<h3 id="listTitle">সব জেলার তালিকা</h3>
+<div id="districts"></div>
+
+<section id="details">
+<h2 id="districtName"></h2>
+<p id="districtDivision"></p>
+<p id="districtIntro"></p>
+
+<div class="cards">
+<div class="card">
+<h3>🏥 হাসপাতাল ও চিকিৎসা</h3>
+<p id="hospital"></p>
+</div>
+<div class="card">
+<h3>🏫 স্কুল ও কলেজ</h3>
+<p id="school"></p>
+</div>
+<div class="card">
+<h3>🏨 হোটেল ও রেস্টুরেন্ট</h3>
+<p id="hotel"></p>
+</div>
+<div class="card">
+<h3>🛍️ স্থানীয় ব্যবসা</h3>
+<p id="business"></p>
+</div>
+<div class="card">
+<h3>📍 দর্শনীয় স্থান</h3>
+<p id="places"></p>
+</div>
+<div class="card">
+<h3>🍲 বিখ্যাত খাবার</h3>
+<p id="food"></p>
+</div>
+</div>
+
+<br>
+<button onclick="closeDetails()">← জেলার তালিকায় ফিরুন</button>
+</section>
+</main>
+
+<footer>Desh Tuba © 2026</footer>
+
+<script>
+const data={
+"ঢাকা":["ঢাকা","ফরিদপুর","গাজীপুর","গোপালগঞ্জ","কিশোরগঞ্জ","মাদারীপুর","মানিকগঞ্জ","মুন্সীগঞ্জ","নারায়ণগঞ্জ","নরসিংদী","রাজবাড়ী","শরীয়তপুর","টাঙ্গাইল"],
+"চট্টগ্রাম":["বান্দরবান","ব্রাহ্মণবাড়িয়া","চাঁদপুর","চট্টগ্রাম","কুমিল্লা","কক্সবাজার","ফেনী","খাগড়াছড়ি","লক্ষ্মীপুর","নোয়াখালী","রাঙামাটি"],
+"রাজশাহী":["বগুড়া","জয়পুরহাট","নওগাঁ","নাটোর","চাঁপাইনবাবগঞ্জ","পাবনা","রাজশাহী","সিরাজগঞ্জ"],
+"খুলনা":["বাগেরহাট","চুয়াডাঙ্গা","যশোর","ঝিনাইদহ","খুলনা","কুষ্টিয়া","মাগুরা","মেহেরপুর","নড়াইল","সাতক্ষীরা"],
+"বরিশাল":["বরগুনা","বরিশাল","ভোলা","ঝালকাঠি","পটুয়াখালী","পিরোজপুর"],
+"সিলেট":["হবিগঞ্জ","মৌলভীবাজার","সুনামগঞ্জ","সিলেট"],
+"রংপুর":["দিনাজপুর","গাইবান্ধা","কুড়িগ্রাম","লালমনিরহাট","নীলফামারী","পঞ্চগড়","রংপুর","ঠাকুরগাঁও"],
+"ময়মনসিংহ":["জামালপুর","ময়মনসিংহ","নেত্রকোণা","শেরপুর"]
+};
+
+const details={
+"ঢাকা":{
+intro:"বাংলাদেশের রাজধানী ও গুরুত্বপূর্ণ মহানগর।",
+places:"লালবাগ কেল্লা, আহসান মঞ্জিল, জাতীয় সংসদ ভবন।",
+food:"বাকরখানি, বিরিয়ানি ও ঐতিহ্যবাহী খাবার।"
+},
+"কক্সবাজার":{
+intro:"সমুদ্রসৈকতের জন্য বিখ্যাত জেলা।",
+places:"কক্সবাজার সমুদ্রসৈকত, হিমছড়ি, ইনানী।",
+food:"সামুদ্রিক মাছ ও স্থানীয় খাবার।"
+},
+"সিলেট":{
+intro:"চা-বাগান ও প্রাকৃতিক সৌন্দর্যের জন্য পরিচিত।",
+places:"জাফলং, রাতারগুল, বিছনাকান্দি।",
+food:"সাতকরা দিয়ে রান্না ও স্থানীয় খাবার।"
+},
+"চট্টগ্রাম":{
+intro:"বাংলাদেশের গুরুত্বপূর্ণ বন্দর ও বাণিজ্যিক অঞ্চল।",
+places:"পতেঙ্গা, ফয়েজ লেক, বাটালি হিল।",
+food:"মেজবানি মাংস ও কালাভুনা।"
+},
+"খুলনা":{
+intro:"বাংলাদেশের দক্ষিণ-পশ্চিমাঞ্চলের গুরুত্বপূর্ণ জেলা।",
+places:"রূপসা নদীর তীর ও সুন্দরবন-সংলগ্ন পর্যটন এলাকা।",
+food:"চুইঝাল ও স্থানীয় খাবার।"
+}
+};
+
+let selectedDivision="সব";
+const divisions=document.getElementById("divisions");
+
+function makeDivisionButtons(){
+divisions.innerHTML="";
+["সব",...Object.keys(data)].forEach(name=>{
+const b=document.createElement("button");
+b.textContent=name==="সব"?"সব বিভাগ":name;
+b.className=selectedDivision===name?"active":"";
+b.onclick=()=>{
+selectedDivision=name;
+makeDivisionButtons();
+renderDistricts();
+closeDetails();
+};
+divisions.appendChild(b);
+});
+}
+
+function renderDistricts(){
+const query=document.getElementById("search").value.trim();
+const list=document.getElementById("districts");
+list.innerHTML="";
+let count=0;
+
+Object.entries(data).forEach(([division,names])=>{
+if(selectedDivision!=="সব"&&selectedDivision!==division)return;
+names.forEach(name=>{
+if(!name.includes(query))return;
+count++;
+const b=document.createElement("button");
+b.textContent="📍 "+name;
+b.onclick=()=>showDetails(name,division);
+list.appendChild(b);
+});
+});
+
+document.getElementById("listTitle").textContent=
+query?"সার্চের ফলাফল":
+selectedDivision==="সব"?"সব জেলার তালিকা":selectedDivision+" বিভাগের জেলা";
+
+if(count===0)list.textContent="কোনো জেলা পাওয়া যায়নি।";
+}
+
+function showDetails(name,division){
+const info=details[name]||{};
+document.getElementById("districtName").textContent="📍 "+name+" জেলা";
+document.getElementById("districtDivision").textContent="বিভাগ: "+division;
+document.getElementById("districtIntro").textContent=info.intro||name+" জেলার পরিচিতি পরে যোগ করা হবে।";
+document.getElementById("places").textContent=info.places||"দর্শনীয় স্থানের তথ্য পরে যোগ করা হবে।";
+document.getElementById("food").textContent=info.food||"স্থানীয় খাবারের তথ্য পরে যোগ করা হবে।";
+document.getElementById("hospital").textContent="যাচাইকৃত হাসপাতালের তথ্য পরে যোগ করা হবে।";
+document.getElementById("school").textContent="যাচাইকৃত স্কুল-কলেজের তথ্য পরে যোগ করা হবে।";
+document.getElementById("hotel").textContent="যাচাইকৃত হোটেলের তথ্য পরে যোগ করা হবে।";
+document.getElementById("business").textContent="যাচাইকৃত ব্যবসার তথ্য পরে যোগ করা হবে।";
+document.getElementById("details").style.display="block";
+document.getElementById("details").scrollIntoView({behavior:"smooth"});
+}
+
+function closeDetails(){
+document.getElementById("details").style.display="none";
+}
+
+makeDivisionButtons();
+renderDistricts();
+</script>
+</body>
+</html>
+```
